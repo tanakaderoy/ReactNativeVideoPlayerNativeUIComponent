@@ -175,3 +175,11 @@ export const COLORS = {
   textColor: '#FFFFFF',
   secondaryText: '#757575',
 };
+
+export const NativeCommands = {
+  pauseFromManager: 'pauseFromManager',
+  seekToFromManager: 'seekToFromManager',
+  goBackFiveFromManager: 'goBackFiveFromManager',
+  goForwardFiveFromManager: 'goForwardFiveFromManager',
+  playFromManager: 'playFromManager',
+};

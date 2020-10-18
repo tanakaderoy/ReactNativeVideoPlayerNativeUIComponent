@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {BASE_VIDEO_STORAGE_URL, COLORS} from '../utils/Util';
+import {BASE_VIDEO_STORAGE_URL, COLORS, NativeCommands} from '../utils/Util';
 import SeekBar from '../components/SeekBar';
 import PlayerControls from '../components/PlayerControls';
 
@@ -43,6 +43,13 @@ const VideoPlayer = ({navigation, route}) => {
   const {video} = route.params;
   const url = video.sources[0];
   const imageURl = BASE_VIDEO_STORAGE_URL + video.thumb;
+  const {
+    pauseFromManager,
+    playFromManager,
+    seekToFromManager,
+    goBackFiveFromManager,
+    goForwardFiveFromManager,
+  } = NativeCommands;
 
   useEffect(() => {
     Orientation.addOrientationListener(handleOrientation);
@@ -55,14 +62,14 @@ const VideoPlayer = ({navigation, route}) => {
   const playOnNative = () => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
-      UIManager.VideoPlayerView.Commands.playFromManager,
+      playFromManager,
       [],
     );
   };
   const pauseOnNative = () => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
-      UIManager.VideoPlayerView.Commands.pauseFromManager,
+      pauseFromManager,
       [],
     );
   };
@@ -70,7 +77,7 @@ const VideoPlayer = ({navigation, route}) => {
   const goBackFiveOnNative = (e) => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
-      UIManager.VideoPlayerView.Commands.goBackFiveFromManager,
+      goBackFiveFromManager,
       [],
     );
     showControlsTimer();
@@ -89,7 +96,7 @@ const VideoPlayer = ({navigation, route}) => {
   const goForwardFiveOnNative = (e) => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
-      UIManager.VideoPlayerView.Commands.goForwardFiveFromManager,
+      goForwardFiveFromManager,
       [],
     );
     showControlsTimer();
@@ -111,7 +118,7 @@ const VideoPlayer = ({navigation, route}) => {
     // console.log(value);
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
-      UIManager.VideoPlayerView.Commands.seekToFromManager,
+      seekToFromManager,
       [value],
     );
     showControlsTimer();

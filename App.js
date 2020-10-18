@@ -41,7 +41,7 @@ const MainStack = () => {
 };
 const App = () => (
   <View style={{flex: 1}}>
-    <StatusBar backgroundColor="blue" barStyle="light-content" />
+    <StatusBar backgroundColor={COLORS.darkPrimary} barStyle="light-content" />
     <MainStack />
   </View>
 );
