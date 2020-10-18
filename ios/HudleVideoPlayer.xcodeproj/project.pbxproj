@@ -21,7 +21,6 @@
 		BAB4CE2125397B4400D4737A /* VideoPlayerViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB4CE2025397B4400D4737A /* VideoPlayerViewManager.swift */; };
 		BAB4CE2325397C5800D4737A /* VideoPlayerViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BAB4CE2225397C5800D4737A /* VideoPlayerViewManager.m */; };
 		BAB4CE252539810F00D4737A /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB4CE242539810F00D4737A /* VideoPlayerView.swift */; };
-		BAB4CE2725398D6F00D4737A /* VideoPlayerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = BAB4CE2625398D6F00D4737A /* VideoPlayerView.xib */; };
 		D101A98A433A2A69AADE8C23 /* libPods-HudleVideoPlayer-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E0F74B646006C3B9F6873C04 /* libPods-HudleVideoPlayer-tvOSTests.a */; };
 		DA1575260280FDEF91760BED /* libPods-HudleVideoPlayer-HudleVideoPlayerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47D8CE3C7535EDCDF0D230E0 /* libPods-HudleVideoPlayer-HudleVideoPlayerTests.a */; };
 /* End PBXBuildFile section */
@@ -82,7 +81,6 @@
 		BAB4CE2025397B4400D4737A /* VideoPlayerViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewManager.swift; sourceTree = "<group>"; };
 		BAB4CE2225397C5800D4737A /* VideoPlayerViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoPlayerViewManager.m; sourceTree = "<group>"; };
 		BAB4CE242539810F00D4737A /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
-		BAB4CE2625398D6F00D4737A /* VideoPlayerView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = VideoPlayerView.xib; sourceTree = "<group>"; };
 		BD7D378BF1B6A783EADEAAD5 /* Pods-HudleVideoPlayer-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HudleVideoPlayer-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-HudleVideoPlayer-tvOSTests/Pods-HudleVideoPlayer-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		CDC3E7102604495F9D128DA9 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		D4DA3EB991404CACBFCE6D50 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
@@ -216,7 +214,6 @@
 			isa = PBXGroup;
 			children = (
 				BAB4CE242539810F00D4737A /* VideoPlayerView.swift */,
-				BAB4CE2625398D6F00D4737A /* VideoPlayerView.xib */,
 			);
 			name = VideoPlayer;
 			sourceTree = "<group>";
@@ -403,7 +400,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				BAB4CE2725398D6F00D4737A /* VideoPlayerView.xib in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

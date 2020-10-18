@@ -7,21 +7,37 @@
 
 import UIKit
 import AVFoundation
+import MediaPlayer
+
 
 class VideoPlayerView: UIView {
-    var player: AVPlayer?
-    var playerLayer:  AVPlayerLayer!
+  // Define Now Playing Info
+  var nowPlayingInfo = [String : Any]()
+  var player: AVPlayer?
+  var playerLayer:  AVPlayerLayer!
   var playerContainerView: UIView!
-  var isVideoPlaying: Bool = false
+  var hasEnded = false
+  @objc var isVideoPlaying: NSNumber = 0
 
-//  @IBOutlet weak var customPlayerView: UIView!
+  var name = ""
+  @objc var videoName: NSString = ""{
+    didSet {
+      name = videoName as String
+    }
+  }
+
+  @objc var thumbnailUrl: NSString = ""{
+    didSet {
+      setUpNowPlayingWithThumbnail()
+    }
+  }
   @objc var url: NSString = "" {
     didSet {
-        print(url)
+      print(url)
       playVideo(url)
     }
   }
-  @objc var onDurationUpdate: RCTDirectEventBlock?
+  @objc var onPlayerUpdate: RCTDirectEventBlock?
   @objc var maximumSliderValue: NSNumber = 0
   @objc var sliderValue: NSNumber = 0
   @objc var minimumValue:NSNumber = 0
@@ -34,53 +50,48 @@ class VideoPlayerView: UIView {
     commoninit()
   }
 
-  lazy var label: UILabel = {
-    let label = UILabel()
-    label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    return label
-  }()
 
   required init?(coder aDecoder: NSCoder) {
-//    super.init(coder: aDecoder)
-//    commoninit()
     fatalError("init(coder:) has not been implemented")
   }
 
-  fileprivate func commoninit() {
+  fileprivate func setUpAudioSession() {
     do {
-        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-        try AVAudioSession.sharedInstance().setActive(true)
+      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+      try AVAudioSession.sharedInstance().setActive(true)
 
     } catch(let error) {
-        print(error.localizedDescription)
+      print(error.localizedDescription)
     }
-  playerContainerView = UIView()
+  }
+
+  fileprivate func setUpPlayerContainer() {
+    playerContainerView = UIView()
     playerContainerView.backgroundColor = .black
-      addSubview(playerContainerView)
+    addSubview(playerContainerView)
     playerContainerView.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
       playerContainerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-playerContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-playerContainerView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1),
-playerContainerView.topAnchor.constraint(equalTo: topAnchor)
+      playerContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
+      playerContainerView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 1),
+      playerContainerView.topAnchor.constraint(equalTo: topAnchor)
     ])
-addPlayerToView(playerContainerView)
-//    let name = String(describing: type(of: self))
-////    let nib = UINib(nibName: name, bundle: .main)
-////    nib.instantiate(withOwner: self, options: nil)
-//    guard let xibView = Bundle.main.loadNibNamed(name, owner: self, options: nil)?.first as? UIView else {return}
-//    xibView.frame = self.bounds
-//    addSubview(xibView)
-//    addPlayerToView(self.customPlayerView)
+    addPlayerToView(playerContainerView)
+  }
+
+  fileprivate func commoninit() {
+    setUpAudioSession()
+    setUpPlayerContainer()
   }
 
   fileprivate func addPlayerToView( _ view: UIView){
     player = AVPlayer()
     playerLayer = AVPlayerLayer(player: player)
     playerLayer.videoGravity = .resizeAspectFill
-    playerLayer.backgroundColor = UIColor.blue.cgColor
     view.layer.addSublayer(playerLayer)
     NotificationCenter.default.addObserver(self, selector: #selector(playerEndPlay), name: .AVPlayerItemDidPlayToEndTime, object: nil)
+    setupRemoteTransportControls()
+    setUpObservers()
 
   }
 
@@ -92,12 +103,16 @@ addPlayerToView(playerContainerView)
   }
 
   @objc func play(){
-    isVideoPlaying = true
+    isVideoPlaying = 1
+    if hasEnded{
+      player?.seek(to: CMTime(seconds: 0, preferredTimescale: 1000))
+      player?.play()
+    }
     player?.play()
   }
 
   @objc func pause() {
-    isVideoPlaying = false
+    isVideoPlaying = 0
     player?.pause()
   }
 
@@ -127,6 +142,9 @@ addPlayerToView(playerContainerView)
 
   @objc func playerEndPlay() {
     print("Player has ended")
+    hasEnded = true
+    isVideoPlaying = 0
+    sendOnPlayerUpdate()
   }
 
   @objc func playVideo( _ url: NSString){
@@ -135,15 +153,16 @@ addPlayerToView(playerContainerView)
     player?.replaceCurrentItem(with: playerItem)
     player?.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
     addTimeObseerver()
-    player?.play()
+    play()
   }
 
 
   override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-    if keyPath == "duration", let duration = player?.currentItem?.duration.seconds, duration > 0.0 {
-      self.duration = getTimeString(from: player?.currentItem?.duration) as NSString
-      self.currentPlayerTime = getTimeString(from: player?.currentTime()) as NSString
-sendDurationUpdate()
+    if keyPath == "duration", let playerDuration = player?.currentItem?.duration.seconds, playerDuration > 0.0 {
+      duration = getTimeString(from: player?.currentItem?.duration) as NSString
+      currentPlayerTime = getTimeString(from: player?.currentTime()) as NSString
+      setupNowPlaying()
+      sendOnPlayerUpdate()
     }
   }
 
@@ -158,7 +177,7 @@ sendDurationUpdate()
       //For some reason on my actual device running iOS14  !currentItem.currentTime().seconds.isNaN was NaN
       self?.sliderValue = !currentItem.currentTime().seconds.isNaN ? NSNumber(value: currentItem.currentTime().seconds) :  NSNumber(value:currentItem.asset.duration.seconds)
       self?.currentPlayerTime = (self?.getTimeString(from: currentItem.currentTime()) ?? "00:00") as NSString
-      self?.sendDurationUpdate()
+      self?.sendOnPlayerUpdate()
     })
   }
 
@@ -176,22 +195,139 @@ sendDurationUpdate()
     }
   }
 
-  func sendDurationUpdate(){
-    if let onDurationUpdate = onDurationUpdate {
+  func setUpObservers() {
+    NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: nil) {[weak self](_) in
+      self?.playerLayer.player = nil
+    }
+    NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: nil) { [weak self](_) in
+      self?.playerLayer.player = self?.player
+    }
+  }
+
+  func setupRemoteTransportControls() {
+    // Get the shared MPRemoteCommandCenter
+    let commandCenter = MPRemoteCommandCenter.shared()
+    commandCenter.skipBackwardCommand.isEnabled = true
+    commandCenter.skipForwardCommand.isEnabled = true
+    commandCenter.changePlaybackPositionCommand.isEnabled = true
+
+    // Add handler for Play Command
+    commandCenter.playCommand.addTarget { [weak self] event in
+      guard let player = self?.player else {return .commandFailed}
+      if player.rate == 0.0 {
+        self?.play()
+        self?.sendOnPlayerUpdate()
+        return .success
+      }
+      return .commandFailed
+    }
+    // Add Handler to seek forward 5
+    commandCenter.skipForwardCommand.addTarget { [weak self](event) in
+      if let _ = self?.player{
+        self?.goForwardFive()
+        self?.sendOnPlayerUpdate()
+        return .success
+      }
+      return .commandFailed
+    }
+
+    commandCenter.changePlaybackPositionCommand.addTarget {[weak self] (event) in
+      if let player = self?.player {
+        let playerRate = player.rate
+        if let event = event as? MPChangePlaybackPositionCommandEvent {
+          player.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: CMTimeScale(1000)), completionHandler: { (success) in
+
+            if success {
+              self?.player?.rate = playerRate
+              self?.setupNowPlaying()
+              self?.sendOnPlayerUpdate()
+            }
+          })
+          return .success
+        }
+      }
+      return .commandFailed
+    }
+
+    //Add Handler to seek backward 5
+    commandCenter.skipBackwardCommand.addTarget { [weak self] event in
+      if let _ = self?.player{
+        self?.goBackFive()
+        self?.sendOnPlayerUpdate()
+        return .success
+      }
+      return .commandFailed
+    }
+
+    // Add handler for Pause Command
+    commandCenter.pauseCommand.addTarget { [weak self] event in
+      guard let player = self?.player else {return .commandFailed}
+      if player.rate == 1.0 {
+        self?.pause()
+        self?.sendOnPlayerUpdate()
+        return .success
+      }
+      return .commandFailed
+    }
+  }
+
+  func setupNowPlaying() {
+    nowPlayingInfo[MPMediaItemPropertyTitle] = name
+    nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player?.currentTime().seconds
+    nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = player?.currentItem?.duration.seconds
+    nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player?.rate
+    // Set the metadata
+    MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+  }
+
+  fileprivate func setUpNowPlayingWithThumbnail() {
+    if let urlString = thumbnailUrl as String? ,let url = URL(string: urlString)  {
+      downloadImage(url: url) {[weak self] (image) in
+        if let image = image{
+          self?.nowPlayingInfo[MPMediaItemPropertyArtwork] =
+            MPMediaItemArtwork(boundsSize: image.size) { size in
+              return image
+            }
+          MPNowPlayingInfoCenter.default().nowPlayingInfo = self?.nowPlayingInfo
+        }
+      }
+    }
+  }
+
+  func sendOnPlayerUpdate(){
+    if let onPlayerUpdate = onPlayerUpdate {
       maximumSliderValue = maximumSliderValue.doubleValue.isNaN ? 0 as NSNumber : maximumSliderValue
-      onDurationUpdate(["duration": duration, "currentTime": currentPlayerTime, "sliderValue": sliderValue, "sliderMinValue": minimumValue, "sliderMaxValue":maximumSliderValue])
+      onPlayerUpdate(["duration": duration, "currentTime": currentPlayerTime, "sliderValue": sliderValue, "sliderMinValue": minimumValue, "sliderMaxValue":maximumSliderValue, "isPlaying": isVideoPlaying])
     }
   }
 
   func sendSliderValueUpdate(){
-    if let onDurationUpdate = onDurationUpdate {
-      onDurationUpdate(["duration": duration])
+    if let onPlayerUpdate = onPlayerUpdate {
+      onPlayerUpdate(["duration": duration])
     }
   }
 
   deinit {
     print("Remov Observers")
     player?.currentItem?.removeObserver(self, forKeyPath: "duration")
+    NotificationCenter.default.removeObserver(self)
+  }
+
+  func downloadImage(url:URL, completion: @escaping((_ image: UIImage?) -> ())){
+    print("Started downloading \"\(url.deletingPathExtension().lastPathComponent)\".")
+    getDataFromUrl(url: url) { (data) in
+      DispatchQueue.main.async {
+        print("Finished downloading \"\(url.deletingPathExtension().lastPathComponent)\".")
+        completion(UIImage(data: data!))
+      }
+    }
+
+  }
+
+  func getDataFromUrl(url:URL, completion: @escaping((_ data: Data?) -> ())) {
+    URLSession.shared.dataTask(with: url) { (data, response, error) in
+      completion(data)
+    }.resume()
   }
   
 }

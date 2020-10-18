@@ -1,32 +1,57 @@
 import React from 'react';
 import {StyleSheet, Text, View, FlatList, Image} from 'react-native';
+import {Icon} from 'react-native-elements';
 import {TouchableOpacity} from 'react-native';
-import {BASE_VIDEO_STORAGE_URL, Routes, VIDEO_DATA} from '../utils/Util';
+import {
+  BASE_VIDEO_STORAGE_URL,
+  COLORS,
+  ROUTES,
+  VIDEO_DATA,
+} from '../utils/Util';
 
 const VideoList = ({navigation}) => {
+  const renderItem = ({item}) => {
+    const imageURl = BASE_VIDEO_STORAGE_URL + item.thumb;
+    return (
+      <TouchableOpacity
+        delayPressIn={50}
+        onPress={() =>
+          navigation.push(ROUTES.videoPlayer, {
+            video: item,
+          })
+        }>
+        <View style={styles.videoItem}>
+          <View>
+            <Image
+              style={styles.thumb}
+              source={{uri: imageURl}}
+              resizeMode="cover"
+            />
+            <Icon
+              containerStyle={{position: 'absolute', bottom: 10, right: 8}}
+              name="play-circle"
+              color={COLORS.textColor}
+              type="font-awesome-5"
+              size={40}
+            />
+          </View>
+
+          <View style={styles.videoTitleContainer}>
+            <Text style={styles.videoTitle}> {item.title}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View style={styles.videoList}>
+    <View style={styles.container}>
       <FlatList
+        style={styles.videoList}
+        showsVerticalScrollIndicator={false}
         data={VIDEO_DATA}
         keyExtractor={(item) => item.id}
-        renderItem={({item}) => {
-          const imageURl = BASE_VIDEO_STORAGE_URL + item.thumb;
-          return (
-            <TouchableOpacity
-              delayPressIn={50}
-              onPress={() =>
-                navigation.navigate(Routes.videoPlayer, {
-                  video: item,
-                })
-              }>
-              <View>
-                <Image style={styles.thumb} source={{uri: imageURl}} />
-                <Text> {item.title}</Text>
-                <Text>{item.description}</Text>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
+        renderItem={renderItem}
       />
     </View>
   );
@@ -35,16 +60,44 @@ const VideoList = ({navigation}) => {
 export default VideoList;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
   videoList: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+    flex: 1,
+  },
+  videoItem: {
+    flex: 1,
+    width: '100%',
+    marginBottom: 20,
+    shadowOffset: {width: 1, height: 1},
+    shadowColor: 'black',
+    shadowOpacity: 1.0,
+  },
+
+  videoTitleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 350,
+    backgroundColor: COLORS.lightPrimary,
+  },
+  videoTitle: {
+    color: COLORS.textColor,
+    fontSize: 18,
+    fontWeight: '700',
   },
   thumb: {
     height: 200,
     width: 350,
-    borderRadius: 10,
+    borderTopRightRadius: 10,
+    borderTopLeftRadius: 10,
     overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: '#b3e5fc',
+    borderColor: COLORS.border,
   },
 });

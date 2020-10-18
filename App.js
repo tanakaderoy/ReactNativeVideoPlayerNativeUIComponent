@@ -7,36 +7,43 @@
  */
 
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import VideoList from './src/screens/VideoList';
 import VideoPlayer from './src/screens/VideoPlayer';
-import { Routes } from './src/utils/Util';
+import {COLORS, ROUTES} from './src/utils/Util';
+import {StatusBar, View} from 'react-native';
 
-const navigator = createStackNavigator({
-  Videos: VideoList,
-  VideoPlayer: VideoPlayer
-},
-{
-  initialRouteName: Routes.videos,
-  defaultNavigationOptions: {
-    title: 'Hudl Video Player'
-  }
-})
-export default createAppContainer(navigator)
+const Stack = createStackNavigator();
+const MainStack = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={ROUTES.videos}
+        screenOptions={{
+          headerTintColor: COLORS.textColor,
+          headerStyle: {
+            backgroundColor: COLORS.darkPrimary,
+            shadowColor: 'transparent',
+          },
+        }}>
+        <Stack.Screen
+          name={ROUTES.videos}
+          component={VideoList}
+          options={{
+            title: 'Hudl Video Player',
+          }}
+        />
+        <Stack.Screen name={ROUTES.videoPlayer} component={VideoPlayer} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+const App = () => (
+  <View style={{flex: 1}}>
+    <StatusBar backgroundColor="blue" barStyle="light-content" />
+    <MainStack />
+  </View>
+);
+
+export default App;
