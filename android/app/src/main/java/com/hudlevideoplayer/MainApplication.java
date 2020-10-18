@@ -2,14 +2,17 @@ package com.hudlevideoplayer;
 
 import android.app.Application;
 import android.content.Context;
+
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.hudlevideoplayer.VideoPlayer.VideoPlayerViewPackage;
+import com.hudlevideoplayer.videoplayer.VideoPlayerViewPackage;
+
 import org.wonday.orientation.OrientationActivityLifecycle;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 

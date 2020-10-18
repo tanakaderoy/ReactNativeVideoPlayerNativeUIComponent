@@ -1,28 +1,19 @@
-package com.hudlevideoplayer.Utils;
+package com.hudlevideoplayer.utils
 
-import androidx.annotation.StringDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import androidx.annotation.StringDef
 
 /**
  * Created by Tanaka Mazivanhanga on 10/18/2020
  */
-public class NativeCommands {
-    public static final String PAUSE_FROM_MANAGER = "pauseFromManager";
-    public static final String SEEK_TO_FROM_MANAGER = "seekToFromManager";
-    public static final String GO_BACK_FIVE_FROM_MANAGER = "goBackFiveFromManager";
-    public static final String GO_FORWARD_FIVE_FROM_MANAGER = "goForwardFiveFromManager";
-    public static final String PLAY_FROM_MANAGER = "playFromManager";
-    public String command;
-
-    public NativeCommands(@NativeCommand String command) {
-        this.command = command;
+class NativeCommands(@param:NativeCommand var command: String) {
+    @StringDef(PAUSE_FROM_MANAGER, SEEK_TO_FROM_MANAGER, GO_BACK_FIVE_FROM_MANAGER, GO_FORWARD_FIVE_FROM_MANAGER, PLAY_FROM_MANAGER)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class NativeCommand
+    companion object {
+        const val PAUSE_FROM_MANAGER = "pauseFromManager"
+        const val SEEK_TO_FROM_MANAGER = "seekToFromManager"
+        const val GO_BACK_FIVE_FROM_MANAGER = "goBackFiveFromManager"
+        const val GO_FORWARD_FIVE_FROM_MANAGER = "goForwardFiveFromManager"
+        const val PLAY_FROM_MANAGER = "playFromManager"
     }
-
-    @StringDef({PAUSE_FROM_MANAGER, SEEK_TO_FROM_MANAGER, GO_BACK_FIVE_FROM_MANAGER, GO_FORWARD_FIVE_FROM_MANAGER, PLAY_FROM_MANAGER})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface NativeCommand {
-    }
-
 }

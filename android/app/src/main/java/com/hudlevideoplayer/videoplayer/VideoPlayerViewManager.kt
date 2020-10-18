@@ -1,164 +1,133 @@
-package com.hudlevideoplayer.VideoPlayer;
+package com.hudlevideoplayer.videoplayer
 
-import android.net.Uri;
-import android.os.Handler;
-import android.widget.VideoView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.SimpleViewManager;
-import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.hudlevideoplayer.Utils.NativeCommands;
-
-import java.util.Locale;
-import java.util.Map;
+import android.net.Uri
+import android.widget.VideoView
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.common.MapBuilder
+import com.facebook.react.uimanager.SimpleViewManager
+import com.facebook.react.uimanager.ThemedReactContext
+import com.facebook.react.uimanager.annotations.ReactProp
+import com.facebook.react.uimanager.events.RCTEventEmitter
+import com.hudlevideoplayer.utils.NativeCommands
+import com.hudlevideoplayer.videoplayer.CustomVideoView.CustomVideoViewInterface
+import java.util.*
 
 /**
  * Created by Tanaka Mazivanhanga on 10/18/2020
  */
-public class VideoPlayerViewManager extends SimpleViewManager<VideoView> implements CustomVideoView.CustomVideoViewInterface {
-    public static final String REACT_CLASS = "VideoPlayerView";
-    CustomVideoView videoView;
-    ReactContext context;
+class VideoPlayerViewManager : SimpleViewManager<VideoView>(), CustomVideoViewInterface {
+    private lateinit var videoView: CustomVideoView
+    private lateinit var context: ReactContext
 
-
-    @NonNull
-    @Override
-    public String getName() {
-        return REACT_CLASS;
+    override fun getName(): String {
+        return REACT_CLASS
     }
 
-    @NonNull
-    @Override
-    protected VideoView createViewInstance(@NonNull ThemedReactContext reactContext) {
-        context = reactContext;
-        videoView = new CustomVideoView(context);
-
-        context.addLifecycleEventListener(videoView);
-        videoView.setCustomVideoViewInterface(this);
-
-        return videoView;
+    override fun createViewInstance(reactContext: ThemedReactContext): VideoView {
+        context = reactContext
+        videoView = CustomVideoView(context)
+        context.addLifecycleEventListener(videoView)
+        videoView.setCustomVideoViewInterface(this)
+        return videoView
     }
 
     @ReactProp(name = "url")
-    public void setVideoPath(VideoView videoView, String urlPath) {
-        Uri uri = Uri.parse(urlPath);
-        videoView.setVideoURI(uri);
-        playFromManager();
-
-        dispatchOnPlayerUpdate();
+    fun setVideoPath(videoView: VideoView, urlPath: String?) {
+        val uri = Uri.parse(urlPath)
+        videoView.setVideoURI(uri)
+        playFromManager()
+        dispatchOnPlayerUpdate()
     }
 
     @ReactProp(name = "videoName")
-    public void setVideoName(VideoView videoView, String name) {
-        System.out.println(name);
+    fun setVideoName(videoView: VideoView?, name: String?) {
+        println(name)
     }
 
     @ReactProp(name = "thumbnailUrl")
-    public void setThumbnailUrl(VideoView videoView, String url) {
-        System.out.println(url);
+    fun setThumbnailUrl(videoView: VideoView?, url: String?) {
+        println(url)
     }
 
     @ReactMethod
-    public void playFromManager() {
-        videoView.play();
-        dispatchOnPlayerUpdate();
+    fun playFromManager() {
+        videoView.play()
+        dispatchOnPlayerUpdate()
     }
 
     @ReactMethod
-    public void pauseFromManager() {
-        videoView.pause();
-        dispatchOnPlayerUpdate();
+    fun pauseFromManager() {
+        videoView.pause()
+        dispatchOnPlayerUpdate()
     }
 
     @ReactMethod
-    public void goForwardFiveFromManager() {
-        videoView.goForwardFive();
-        dispatchOnPlayerUpdate();
+    fun goForwardFiveFromManager() {
+        videoView.goForwardFive()
+        dispatchOnPlayerUpdate()
     }
 
     @ReactMethod
-    public void goBackFiveFromManager() {
-        videoView.goBackFive();
-        dispatchOnPlayerUpdate();
+    fun goBackFiveFromManager() {
+        videoView.goBackFive()
+        dispatchOnPlayerUpdate()
     }
 
     @ReactMethod
-    public void seekToFromManager(int time) {
-        videoView.seekTo(time);
-        dispatchOnPlayerUpdate();
+    fun seekToFromManager(time: Int) {
+        videoView.seekTo(time)
+        dispatchOnPlayerUpdate()
     }
 
-    @Override
-    public @Nullable
-    Map getExportedCustomDirectEventTypeConstants() {
+    override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Map<String, String>>? {
         return MapBuilder.of(
                 "onPlayerUpdate",
                 MapBuilder.of("registrationName", "onPlayerUpdate")
-        );
+        )
     }
 
-    private void dispatchOnPlayerUpdate() {
-        WritableMap event = Arguments.createMap();
-        event.putString("duration", getTimeString(videoView.getDuration()));
-        event.putInt("sliderValue", videoView.getCurrentPosition());
-        event.putInt("sliderMaxValue", videoView.getDuration());
-        event.putInt("sliderMinValue", 0);
-        event.putInt("isPlaying", videoView.isVideoPlaying);
-        event.putString("currentTime", getTimeString(videoView.getCurrentPosition()));
-
-
-        context.getJSModule(RCTEventEmitter.class).receiveEvent(videoView.getId(), "onPlayerUpdate", event);
-
-
+    private fun dispatchOnPlayerUpdate() {
+        val event = Arguments.createMap()
+        event.putString("duration", getTimeString(videoView.duration))
+        event.putInt("sliderValue", videoView.currentPosition)
+        event.putInt("sliderMaxValue", videoView.duration)
+        event.putInt("sliderMinValue", 0)
+        event.putInt("isPlaying", videoView.isVideoPlaying)
+        event.putString("currentTime", getTimeString(videoView.currentPosition))
+        context.getJSModule(RCTEventEmitter::class.java).receiveEvent(videoView.id, "onPlayerUpdate", event)
     }
 
-    @Override
-    public void receiveCommand(@NonNull VideoView root, String commandId, @Nullable ReadableArray args) {
-        super.receiveCommand(root, commandId, args);
-        System.out.println(commandId);
-        NativeCommands nativeCommands = new NativeCommands(commandId);
-        switch (nativeCommands.command) {
-            case NativeCommands.GO_BACK_FIVE_FROM_MANAGER:
-                goBackFiveFromManager();
-                break;
-            case NativeCommands.GO_FORWARD_FIVE_FROM_MANAGER:
-                goForwardFiveFromManager();
-                break;
-            case NativeCommands.PAUSE_FROM_MANAGER:
-                pauseFromManager();
-                break;
-            case NativeCommands.PLAY_FROM_MANAGER:
-                playFromManager();
-                break;
-            case NativeCommands.SEEK_TO_FROM_MANAGER:
-                seekToFromManager(args != null ? args.getInt(0) : 0);
-                break;
-            default:
+    override fun receiveCommand(root: VideoView, commandId: String, args: ReadableArray?) {
+        super.receiveCommand(root, commandId, args)
+        println(commandId)
+        val nativeCommands = NativeCommands(commandId)
+        when (nativeCommands.command) {
+            NativeCommands.GO_BACK_FIVE_FROM_MANAGER -> goBackFiveFromManager()
+            NativeCommands.GO_FORWARD_FIVE_FROM_MANAGER -> goForwardFiveFromManager()
+            NativeCommands.PAUSE_FROM_MANAGER -> pauseFromManager()
+            NativeCommands.PLAY_FROM_MANAGER -> playFromManager()
+            NativeCommands.SEEK_TO_FROM_MANAGER -> seekToFromManager(args?.getInt(0) ?: 0)
+            else -> {
+            }
         }
     }
 
-    private String getTimeString(int time) {
-        long totalSeconds = time / 1000;
-        long hours = totalSeconds / 3600;
-        long minutes = totalSeconds / 60 % 60;
-        long seconds = totalSeconds % 60;
-        return hours > 60 ? String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds) : String.format(Locale.US, "%02d:%02d", minutes, seconds);
+    private fun getTimeString(time: Int): String {
+        val totalSeconds = time / 1000.toLong()
+        val hours = totalSeconds / 3600
+        val minutes = totalSeconds / 60 % 60
+        val seconds = totalSeconds % 60
+        return if (hours > 60) String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds) else String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
 
-    @Override
-    public void peformDispatch() {
-        dispatchOnPlayerUpdate();
+    override fun peformDispatch() {
+        dispatchOnPlayerUpdate()
     }
 
-
+    companion object {
+        const val REACT_CLASS = "VideoPlayerView"
+    }
 }

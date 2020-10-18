@@ -1,94 +1,82 @@
-package com.hudlevideoplayer.VideoPlayer;
+package com.hudlevideoplayer.videoplayer
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.VideoView;
+import android.content.Context
+import android.widget.VideoView
+import com.facebook.react.bridge.LifecycleEventListener
+import kotlin.math.max
 
-import com.facebook.react.bridge.LifecycleEventListener;
 
 /**
  * Created by Tanaka Mazivanhanga on 10/18/2020
  */
-class CustomVideoView extends VideoView implements LifecycleEventListener {
-    int isVideoPlaying = 0;
-    boolean running = false;
-    CustomVideoViewInterface customVideoViewInterface;
-
-    public void setCustomVideoViewInterface(CustomVideoViewInterface customVideoViewInterface) {
-        this.customVideoViewInterface = customVideoViewInterface;
+class CustomVideoView(context: Context) : VideoView(context), LifecycleEventListener {
+    var isVideoPlaying = 0
+    private var running = false
+    private lateinit var customVideoViewInterface: CustomVideoViewInterface
+    fun setCustomVideoViewInterface(customVideoViewInterface: CustomVideoViewInterface) {
+        this.customVideoViewInterface = customVideoViewInterface
     }
 
-    public CustomVideoView(Context context) {
-        super(context);
-        setOnCompletionListener(mp -> {
-            customVideoViewInterface.peformDispatch();
-            running = false;
-        });
-        setOnPreparedListener(mp -> {
-            running = true;
-            final int duration = getDuration();
-
-            new Thread(() -> {
+    init {
+        setOnCompletionListener {
+            isVideoPlaying = 0
+            customVideoViewInterface.peformDispatch()
+            running = false
+        }
+        setOnPreparedListener {
+            running = true
+            val duration = duration
+            Thread {
                 do {
-                    post(() -> customVideoViewInterface.peformDispatch());
+                    post { customVideoViewInterface.peformDispatch() }
                     try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Thread.sleep(500)
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
                     }
-                    if (!running) break;
-                }
-                while (getCurrentPosition() < duration);
-            }).start();
-        });
+                    if (!running) break
+                } while (currentPosition < duration)
+            }.start()
+        }
     }
 
-    public CustomVideoView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    override fun onHostResume() {
+        running = true
     }
 
-    public CustomVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    override fun onHostPause() {
+        running = false
     }
 
-
-    @Override
-    public void onHostResume() {
-        running = true;
+    override fun onHostDestroy() {
+        running = false
+        stopPlayback()
     }
 
-    @Override
-    public void onHostPause() {
-        running = false;
+    fun play() {
+        isVideoPlaying = 1
+        start()
     }
 
-    @Override
-    public void onHostDestroy() {
-        running = false;
+    override fun pause() {
+        super.pause()
+        isVideoPlaying = 0
     }
 
-    public void play() {
-        isVideoPlaying = 1;
-        start();
+    fun goForwardFive() {
+        val newTime = currentPosition + 5000
+        seekTo(if (newTime > duration) 0 else newTime)
     }
 
-    @Override
-    public void pause() {
-        super.pause();
-        isVideoPlaying = 0;
+    fun goBackFive() {
+        val newTime = currentPosition - 5000
+        seekTo(max(newTime, 0))
     }
 
-    public void goForwardFive() {
-        int newTime = getCurrentPosition() + 5000;
-        seekTo(newTime > getDuration() ? 0 : newTime);
-    }
-
-    public void goBackFive() {
-        int newTime = getCurrentPosition() - 5000;
-        seekTo(Math.max(newTime, 0));
-    }
 
     interface CustomVideoViewInterface {
-        void peformDispatch();
+        fun peformDispatch()
     }
+
+
 }
