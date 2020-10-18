@@ -22,6 +22,7 @@ const MainStack = () => {
         initialRouteName={ROUTES.videos}
         screenOptions={{
           headerTintColor: COLORS.textColor,
+          gestureEnabled: true,
           headerStyle: {
             backgroundColor: COLORS.darkPrimary,
             shadowColor: 'transparent',
