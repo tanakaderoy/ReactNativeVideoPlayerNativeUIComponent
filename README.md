@@ -1,5 +1,12 @@
 # ReactNativeVideoPlayerNativeUIComponent
 A React Native app with a custom ui component video player. iOS AVPlayer. Android VideoView
+
+# Gifs
+
+![andVid](https://user-images.githubusercontent.com/42681052/96399727-0e286c80-119d-11eb-9a42-d374864a5110.gif)
+![iPhone](https://user-images.githubusercontent.com/42681052/96399243-e8e72e80-119b-11eb-92c1-574e22dcc9c6.gif)
+
+
 # ScreenShots
 
 ![iOS Video List](https://user-images.githubusercontent.com/42681052/96397369-69576080-1197-11eb-9a60-6e711bd8b009.png)
