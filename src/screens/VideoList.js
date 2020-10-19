@@ -1,8 +1,15 @@
-import React, {useEffect} from 'react';
+/* eslint-disable react-native/no-inline-styles */
 import NetInfo from '@react-native-community/netinfo';
-import {StyleSheet, Text, View, FlatList, Image} from 'react-native';
+import React, {useEffect} from 'react';
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {Icon} from 'react-native-elements';
-import {TouchableOpacity} from 'react-native';
 import {
   BASE_VIDEO_STORAGE_URL,
   COLORS,
