@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import NetInfo from '@react-native-community/netinfo';
 import {StyleSheet, Text, View, FlatList, Image} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {TouchableOpacity} from 'react-native';
@@ -10,14 +11,29 @@ import {
 } from '../utils/Util';
 
 const VideoList = ({navigation}) => {
+  useEffect(() => {
+    const unsub = NetInfo.addEventListener((s) => {
+      console.log('Connection type', s.type);
+      console.log('Is connected?', s.isConnected);
+    });
+    return () => {
+      unsub();
+    };
+  }, []);
   const renderItem = ({item}) => {
     const imageURl = BASE_VIDEO_STORAGE_URL + item.thumb;
     return (
       <TouchableOpacity
         delayPressIn={50}
         onPress={() =>
-          navigation.push(ROUTES.videoPlayer, {
-            video: item,
+          NetInfo.fetch().then(({isConnected, type}) => {
+            console.log('Connection type', type);
+            console.log('Is connected?', isConnected);
+            isConnected
+              ? navigation.push(ROUTES.videoPlayer, {
+                  video: item,
+                })
+              : alert('Must be connected to Internet');
           })
         }>
         <View style={styles.videoItem}>
