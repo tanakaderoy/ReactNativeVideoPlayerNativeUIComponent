@@ -48,4 +48,10 @@ class VideoPlayerViewManager: RCTViewManager {
        component.seekTo(seconds)
      }
   }
+  @objc func playVidFromManager( _ node: NSNumber, vidUrl: NSString){
+    DispatchQueue.main.async {
+       guard let component = self.bridge.uiManager.view(forReactTag: node) as? VideoPlayerView else { return }
+       component.playVideo(vidUrl)
+     }
+  }
 }

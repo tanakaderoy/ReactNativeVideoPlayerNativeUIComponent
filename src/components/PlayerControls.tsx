@@ -3,12 +3,19 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {COLORS} from '../utils/Util';
 
+interface Props {
+  onSkipBack: () => void;
+  onSkipForward: () => void;
+  onPlayPause: () => void;
+  isPlaying: boolean;
+}
+
 const PlayerControls = ({
   onSkipBack,
   onSkipForward,
   onPlayPause,
   isPlaying,
-}) => {
+}: Props) => {
   const controlIconSize = 50;
 
   return (

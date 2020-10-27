@@ -36,9 +36,8 @@ class VideoPlayerViewManager : SimpleViewManager<VideoView>(), CustomVideoViewIn
 
     @ReactProp(name = "url")
     fun setVideoPath(videoView: VideoView, urlPath: String?) {
-        val uri = Uri.parse(urlPath)
-        videoView.setVideoURI(uri)
-        playFromManager()
+
+        playVidFromManager(urlPath)
         dispatchOnPlayerUpdate()
     }
 
@@ -80,6 +79,13 @@ class VideoPlayerViewManager : SimpleViewManager<VideoView>(), CustomVideoViewIn
     fun seekToFromManager(time: Int) {
         videoView.seekTo(time)
         dispatchOnPlayerUpdate()
+    }
+
+    @ReactMethod
+    fun playVidFromManager(vidUrl: String?) {
+        val uri = Uri.parse(vidUrl)
+        videoView.setVideoURI(uri)
+        playFromManager()
     }
 
     override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Map<String, String>>? {

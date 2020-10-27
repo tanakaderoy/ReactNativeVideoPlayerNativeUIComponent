@@ -17,6 +17,9 @@ RCT_EXTERN_METHOD(goForwardFiveFromManager:(nonnull NSNumber *)node)
 RCT_EXTERN_METHOD(goBackFiveFromManager:(nonnull NSNumber *)node)
 RCT_EXTERN_METHOD(seekToFromManager:(nonnull NSNumber *)node
                   seconds: (nonnull NSNumber *)seconds)
+RCT_EXTERN_METHOD(playVidFromManager:(nonnull NSNumber *)node
+                  vidUrl: (nonnull NSString *)vidUrl)
+
 
 
 

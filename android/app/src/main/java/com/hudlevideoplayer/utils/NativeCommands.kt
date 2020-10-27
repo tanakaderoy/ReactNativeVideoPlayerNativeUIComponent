@@ -6,7 +6,7 @@ import androidx.annotation.StringDef
  * Created by Tanaka Mazivanhanga on 10/18/2020
  */
 class NativeCommands(@param:NativeCommand var command: String) {
-    @StringDef(PAUSE_FROM_MANAGER, SEEK_TO_FROM_MANAGER, GO_BACK_FIVE_FROM_MANAGER, GO_FORWARD_FIVE_FROM_MANAGER, PLAY_FROM_MANAGER)
+    @StringDef(PAUSE_FROM_MANAGER, SEEK_TO_FROM_MANAGER, GO_BACK_FIVE_FROM_MANAGER, GO_FORWARD_FIVE_FROM_MANAGER, PLAY_FROM_MANAGER, PLAY_VID_FROM_MANAGER)
     @Retention(AnnotationRetention.SOURCE)
     annotation class NativeCommand
     companion object {
@@ -15,5 +15,6 @@ class NativeCommands(@param:NativeCommand var command: String) {
         const val GO_BACK_FIVE_FROM_MANAGER = "goBackFiveFromManager"
         const val GO_FORWARD_FIVE_FROM_MANAGER = "goForwardFiveFromManager"
         const val PLAY_FROM_MANAGER = "playFromManager"
+        const val PLAY_VID_FROM_MANAGER = "playVidFromManager"
     }
 }

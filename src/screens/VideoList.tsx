@@ -4,20 +4,26 @@ import React, {useEffect} from 'react';
 import {
   FlatList,
   Image,
+  ListRenderItem,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import {Icon} from 'react-native-elements';
+import {NavigationStackProp} from 'react-navigation-stack';
 import {
   BASE_VIDEO_STORAGE_URL,
   COLORS,
   ROUTES,
+  VideoItem,
   VIDEO_DATA,
 } from '../utils/Util';
+interface Props {
+  navigation: NavigationStackProp<{}>;
+}
 
-const VideoList = ({navigation}) => {
+const VideoList = ({navigation}: Props) => {
   useEffect(() => {
     const unsub = NetInfo.addEventListener((s) => {
       console.log('Connection type', s.type);
@@ -27,7 +33,7 @@ const VideoList = ({navigation}) => {
       unsub();
     };
   }, []);
-  const renderItem = ({item}) => {
+  const renderItem: ListRenderItem<VideoItem> = ({item}) => {
     const imageURl = BASE_VIDEO_STORAGE_URL + item.thumb;
     return (
       <TouchableOpacity
@@ -69,7 +75,7 @@ const VideoList = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <FlatList<VideoItem>
         style={styles.videoList}
         showsVerticalScrollIndicator={false}
         data={VIDEO_DATA}

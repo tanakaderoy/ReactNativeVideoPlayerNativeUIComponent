@@ -1,24 +1,51 @@
+import {RouteProp} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import React, {useEffect, useState} from 'react';
-import Orientation from 'react-native-orientation-locker';
-import {Icon} from 'react-native-elements';
 import {
+  Dimensions,
+  findNodeHandle,
+  FlatList,
+  Image,
+  NativeMethods,
+  requireNativeComponent,
+  ScrollView,
+  StatusBar,
+  StyleProp,
   StyleSheet,
   Text,
-  View,
-  requireNativeComponent,
-  UIManager,
-  findNodeHandle,
-  Dimensions,
-  StatusBar,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  UIManager,
+  View,
+  ViewStyle,
 } from 'react-native';
-import {BASE_VIDEO_STORAGE_URL, COLORS, NativeCommands} from '../utils/Util';
-import SeekBar from '../components/SeekBar';
+import {Icon} from 'react-native-elements';
+import Orientation from 'react-native-orientation-locker';
 import PlayerControls from '../components/PlayerControls';
+import SeekBar from '../components/SeekBar';
+import {
+  BASE_VIDEO_STORAGE_URL,
+  COLORS,
+  NativeCommands,
+  VideoItem,
+  VIDEO_DATA,
+} from '../utils/Util';
 
-const VideoPlayerView = requireNativeComponent('VideoPlayerView');
-const VideoPlayer = ({navigation, route}) => {
+interface Props {
+  navigation: StackNavigationProp<{}>;
+  route: RouteProp<{video: {video: VideoItem}}, 'video'>;
+}
+interface VideoPlayerViewInterface {
+  style: StyleProp<ViewStyle>;
+  url: string;
+  videoName: string;
+  thumbnailUrl: string;
+  onPlayerUpdate: (e: any) => void;
+}
+const VideoPlayerView = requireNativeComponent<VideoPlayerViewInterface>(
+  'VideoPlayerView',
+);
+const VideoPlayer = ({route, navigation}: Props) => {
   const [state, setState] = useState({
     duration: '00:00',
     sliderValue: 0,
@@ -29,7 +56,9 @@ const VideoPlayer = ({navigation, route}) => {
     fullscreen: false,
     showControls: true,
   });
-  const [videoPlayerRef, setVideoPlayerRef] = useState(null);
+  const [videoPlayerRef, setVideoPlayerRef] = useState<NativeMethods | any>(
+    null,
+  );
   const {
     sliderMaxValue,
     sliderMinValue,
@@ -40,7 +69,8 @@ const VideoPlayer = ({navigation, route}) => {
     fullscreen,
     showControls,
   } = state;
-  const {video} = route.params;
+  const routeVideo = route.params.video;
+  const [video, setVideo] = useState(routeVideo);
   const url = video.sources[0];
   const imageURl = BASE_VIDEO_STORAGE_URL + video.thumb;
   const {
@@ -49,7 +79,9 @@ const VideoPlayer = ({navigation, route}) => {
     seekToFromManager,
     goBackFiveFromManager,
     goForwardFiveFromManager,
+    playVidFromManager,
   } = NativeCommands;
+  const relatedVideos = VIDEO_DATA.filter((x) => x.id !== video.id);
 
   useEffect(() => {
     Orientation.addOrientationListener(handleOrientation);
@@ -74,7 +106,7 @@ const VideoPlayer = ({navigation, route}) => {
     );
   };
 
-  const goBackFiveOnNative = (e) => {
+  const goBackFiveOnNative = () => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
       goBackFiveFromManager,
@@ -93,7 +125,7 @@ const VideoPlayer = ({navigation, route}) => {
     playOnNative();
   };
 
-  const goForwardFiveOnNative = (e) => {
+  const goForwardFiveOnNative = () => {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
       goForwardFiveFromManager,
@@ -101,7 +133,7 @@ const VideoPlayer = ({navigation, route}) => {
     );
     showControlsTimer();
   };
-  const onPlayerUpdate = (e) => {
+  const onPlayerUpdate = (e: any) => {
     // console.log(e.nativeEvent);
     setState({
       ...state,
@@ -114,7 +146,7 @@ const VideoPlayer = ({navigation, route}) => {
     });
   };
 
-  const seekToOnNative = (value) => {
+  const seekToOnNative = (value: number) => {
     // console.log(value);
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(videoPlayerRef),
@@ -123,13 +155,21 @@ const VideoPlayer = ({navigation, route}) => {
     );
     showControlsTimer();
   };
+  const playVid = (vidUrl: string) => {
+    console.log(vidUrl);
+    UIManager.dispatchViewManagerCommand(
+      findNodeHandle(videoPlayerRef),
+      playVidFromManager,
+      [vidUrl],
+    );
+  };
   const showControlsTimer = () => {
     if (showControls && isPlaying) {
       setTimeout(() => setState((s) => ({...s, showControls: false})), 2000);
     }
   };
 
-  const handleOrientation = (orientation) => {
+  const handleOrientation = (orientation: string) => {
     Orientation.getDeviceOrientation((deviceOrientation) => {
       console.log('Current Device Orientation: ', deviceOrientation);
     });
@@ -155,6 +195,11 @@ const VideoPlayer = ({navigation, route}) => {
       : setState({...state, showControls: true});
   };
 
+  const changeVideo = (item: VideoItem) => {
+    setVideo(item);
+    playVid(item.sources[0]);
+  };
+
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={handleShowControls}>
@@ -164,10 +209,10 @@ const VideoPlayer = ({navigation, route}) => {
             style={
               fullscreen ? styles.fullscreenVideoPlayer : styles.videoPlayer
             }
-            onPlayerUpdate={onPlayerUpdate}
             url={url}
             videoName={video.title}
             thumbnailUrl={imageURl}
+            onPlayerUpdate={onPlayerUpdate}
           />
           {showControls && (
             <View style={styles.controlOverlay}>
@@ -201,10 +246,58 @@ const VideoPlayer = ({navigation, route}) => {
           )}
         </View>
       </TouchableWithoutFeedback>
-      <View style={styles.textContainer}>
-        <Text style={styles.titleText}>{video.title}</Text>
-        <Text style={styles.text}>{video.description}</Text>
-      </View>
+      <ScrollView>
+        <View style={styles.textContainer}>
+          <Text style={styles.titleText}>{video.title}</Text>
+          <Text style={{...styles.text, marginStart: 8}}>
+            {video.description}
+          </Text>
+          <View
+            style={{
+              flex: 1,
+              height: '100%',
+              paddingVertical: 10,
+            }}>
+            <Text style={{...styles.titleText, marginTop: 10}}>
+              Related Videos
+            </Text>
+            <FlatList<VideoItem>
+              data={relatedVideos}
+              horizontal
+              keyExtractor={(x) => x.id}
+              renderItem={({item}) => {
+                return (
+                  <TouchableOpacity onPress={() => changeVideo(item)}>
+                    <Image
+                      source={{uri: BASE_VIDEO_STORAGE_URL + item.thumb}}
+                      style={{
+                        height: 100,
+                        width: 200,
+                        marginStart: 8,
+                        marginEnd: 5,
+                        borderRadius: 10,
+                      }}
+                      height={200}
+                      width={350}
+                      resizeMode="cover"
+                    />
+                    <Text
+                      style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: 16,
+                        ...styles.text,
+                        backgroundColor: '#092439',
+                      }}>
+                      {item.title}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -234,7 +327,8 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: '600',
     color: COLORS.textColor,
-    marginBottom: 50,
+    backgroundColor: COLORS.primary,
+    marginBottom: 10,
   },
   text: {
     color: COLORS.textColor,
